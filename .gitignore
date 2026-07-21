@@ -1,0 +1,27 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Environment variables & local configuration
+.env
+.env.local
+
+# Project data directory (Ignore all historical PDF lab reports for privacy/PII)
+historical_reports/*
+!historical_reports/.gitkeep
+
+# Output visualizations and temporary artifacts
+knowledge_graph.html
+*.log
+
+# IDE & OS metadata
+.DS_Store
+.idea/
+.vscode/
