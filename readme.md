@@ -1,18 +1,17 @@
-Here is the updated `README.md` file reflecting the fully decoupled MinIO upload architecture, along with generic, anonymized table schemas and sample structures so no personal health information (PHI/PII) is included.
+Here is the complete, consolidated `README.md` file featuring the updated **Multi-Tenant State Engine** view for PostgreSQL (meta-catalog + Silver layer) alongside the full architecture, schema definitions, and workflow steps.
 
-Save this directly as `README.md` in your project root.
+Save this directly into your `README.md` file in the project root:
 
----
-
+```markdown
 # 🏥 Clinical Analytics & Knowledge Graph Lakehouse
 
 An enterprise-grade, multi-tiered data lakehouse architecture designed for processing raw clinical lab reports (PDFs) into structured tabular analytics (Apache Iceberg) and semi-structured Knowledge Graphs (RDF Triplestore).
 
 ---
 
-## 🏗️ Architecture Overview
+## 🏗️ 1. Data Pipeline Architecture
 
-```
+```text
                                   ┌───────────────────────────────┐
                                   │   Raw Lab Reports (PDFs)      │
                                   └───────────────┬───────────────┘
@@ -42,12 +41,59 @@ An enterprise-grade, multi-tiered data lakehouse architecture designed for proce
 
 ---
 
-## 📊 Database & Table Schemas
+## 🐳 2. Container & Service Infrastructure
 
-### 1. Silver Layer (PostgreSQL: `document_lake`)
+```text
+System Architecture Diagram
+       [ Client / Host Browser ]
+     :8080   :8181   :5432   :9000 / :9090
+       │       │       │       │
+┌──────┼───────┼───────┼───────┼──────────────────────────────────────────────────────────────┐
+│      ▼       ▼       ▼       ▼                                                              │
+│  ┌───────────────────────────────┐                                                          │
+│  │    presto-network (bridge)    │                                                          │
+│  └───────────────┬───────────────┘                                                          │
+│                  │                                                                          │
+│  ┌───────────────┼───────────────────────────────────────────────────────────────────────┐  │
+│  │ SERVICES      │                                                                       │  │
+│  │               ├──────────────► ┌───────────────────────────────────────────────────┐  │  │
+│  │               │                │ presto-coordinator (SQL Query Engine)             │  │  │
+│  │               │                └──────────────┬────────────────────────────────────┘  │  │
+│  │               │                               │ Queries                               │  │
+│  │               │                               ▼                                       │  │
+│  │               ├──────────────► ┌───────────────────────────────────────────────────┐  │  │
+│  │               │                │ rest (Iceberg REST Catalog)                       │  │  │
+│  │               │                └──────────────┬────────────────────────────────────┘  │  │
+│  │               │                               │ Metastore URI                         │  │
+│  │               │                               ▼                                       │  │
+│  │               ├──────────────► ┌───────────────────────────────────────────────────┐  │  │
+│  │               │                │ postgres (Multi-Tenant State Engine)              │  │  │
+│  │               │                │ ├── metastore_db (Catalog Metadata)               │  │  │
+│  │               │                │ └── document_lake (Silver Staging / JSONB)        │  │  │
+│  │               │                └───────────────────────────────────────────────────┘  │  │
+│  │               │                                                                       │  │
+│  │               ├──────────────► ┌───────────────────────────────────────────────────┐  │  │
+│  │               │                │ minio (S3 Object Storage - Bronze & Gold Parquet) │  │  │
+│  │               │                └──────────────▲────────────────────────────────────┘  │  │
+│  │               │                               │ Init / Bucket                         │  │
+│  │               ├──────────────► ┌──────────────┴────────────────────────────────────┐  │  │
+│  │               │                │ mc (MinIO Client Init)                            │  │  │
+│  │               │                └───────────────────────────────────────────────────┘  │  │
+│  └───────────────┴───────────────────────────────────────────────────────────────────────┘  │
+│                                                                                             │
+│  VOLUMES: [ minio-data ]   [ catalog-data ]   [ postgres-data ]                             │
+└─────────────────────────────────────────────────────────────────────────────────────────────┘
+
+```
+
+---
+
+## 📊 3. Database & Table Schemas
+
+### A. Silver Layer (PostgreSQL: `document_lake`)
 
 * **Table:** `public.staging_reports`
-* **Purpose:** Acts as an operational JSON document staging area before relational flatten-and-load transformations.
+* **Purpose:** Operational JSON document staging layer for state retention and change-data-capture.
 
 | Column | Data Type | Key / Constraint | Description |
 | --- | --- | --- | --- |
@@ -59,9 +105,9 @@ An enterprise-grade, multi-tiered data lakehouse architecture designed for proce
 
 ---
 
-### 2. Gold Tabular Layer (Iceberg: `iceberg.clinical_analytics`)
+### B. Gold Tabular Layer (Iceberg: `iceberg.clinical_analytics`)
 
-#### **Table A:** `patients`
+#### **Table 1:** `patients`
 
 * **Location:** `s3://warehouse/clinical_analytics/patients/`
 
@@ -72,7 +118,7 @@ An enterprise-grade, multi-tiered data lakehouse architecture designed for proce
 | `gender` | `VARCHAR` | Gender Code (`M` / `F`) |
 | `date_of_birth` | `DATE` | Patient Date of Birth |
 
-#### **Table B:** `lab_observations`
+#### **Table 2:** `lab_observations`
 
 * **Location:** `s3://warehouse/clinical_analytics/lab_observations/`
 * **Partitioning:** `ARRAY['loinc_code']`
@@ -96,7 +142,7 @@ An enterprise-grade, multi-tiered data lakehouse architecture designed for proce
 
 ---
 
-### 3. Gold Knowledge Graph Layer (Iceberg: `iceberg.knowledge_graph`)
+### C. Gold Knowledge Graph Layer (Iceberg: `iceberg.knowledge_graph`)
 
 * **Table:** `global_triplestore`
 * **Purpose:** Schema-less RDF Triplestore model for graph-based queries and multi-modal entity linking.
@@ -109,15 +155,15 @@ An enterprise-grade, multi-tiered data lakehouse architecture designed for proce
 
 ---
 
-## 🛠️ Prerequisites & System Requirements
+## 🛠️ 4. Prerequisites & System Requirements
 
 * **Python:** `3.9+` (Tested on `3.11` / `3.12`)
-* **Docker & Docker Compose:** MinIO, PostgreSQL, and Presto/Trino Coordinator.
+* **Docker & Docker Compose:** MinIO, PostgreSQL, Iceberg REST Catalog, and Presto Coordinator.
 * **Operating System:** macOS / Linux / WSL2
 
 ---
 
-## 📦 Dependencies & Environment Setup
+## 📦 5. Dependencies & Environment Setup
 
 ### 1. Initialize Virtual Environment
 
@@ -127,7 +173,7 @@ source venv/bin/activate
 
 ```
 
-### 2. Install Dependencies
+### 2. Install Required Packages
 
 ```bash
 pip install --upgrade pip
@@ -147,7 +193,7 @@ pip install \
 
 ---
 
-## 🚀 Execution Workflow
+## 🚀 6. Execution Workflow
 
 ### Step 1: Upload Raw Files to Bronze Storage
 
@@ -187,7 +233,7 @@ python python-scripts/visualize_graph.py
 
 ---
 
-## 🔍 Validation & Inspection Commands
+## 🔍 7. Validation & Inspection Commands
 
 ### 1. Check Bronze Layer (MinIO Storage)
 
@@ -242,7 +288,7 @@ LIMIT 15;"
 
 ---
 
-## 🧹 Troubleshooting & Common Fixes
+## 🧹 8. Troubleshooting & Common Fixes
 
 | Issue / Error | Cause | Resolution |
 | --- | --- | --- |
@@ -250,3 +296,7 @@ LIMIT 15;"
 | `NoSuchBucketException (404)` | Target bucket missing when Presto executes DDL. | Ensure `self.minio_client.create_bucket()` runs before Presto DDL queries. |
 | `Catalog/Schema must be specified` | Query string lacks fully qualified catalog paths. | Always use `iceberg.schema.table` in SQLAlchemy/Trino query strings. |
 | `f-string expression cannot include backslash` | Backslashes inside f-string brackets on Python <3.12. | Pre-sanitize single quotes (`.replace("'", "''")`) in an explicit local variable prior to string interpolation. |
+
+```
+
+```
