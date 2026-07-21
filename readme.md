@@ -1,7 +1,3 @@
-Here is the complete, consolidated `README.md` file featuring the updated **Multi-Tenant State Engine** view for PostgreSQL (meta-catalog + Silver layer) alongside the full architecture, schema definitions, and workflow steps.
-
-Save this directly into your `README.md` file in the project root:
-
 ```markdown
 # 🏥 Clinical Analytics & Knowledge Graph Lakehouse
 
