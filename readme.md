@@ -1,4 +1,3 @@
-```markdown
 # 🏥 Clinical Analytics & Knowledge Graph Lakehouse
 
 An enterprise-grade, multi-tiered data lakehouse architecture designed for processing raw clinical lab reports (PDFs) into structured tabular analytics (Apache Iceberg) and semi-structured Knowledge Graphs (RDF Triplestore).
@@ -292,7 +291,3 @@ LIMIT 15;"
 | `NoSuchBucketException (404)` | Target bucket missing when Presto executes DDL. | Ensure `self.minio_client.create_bucket()` runs before Presto DDL queries. |
 | `Catalog/Schema must be specified` | Query string lacks fully qualified catalog paths. | Always use `iceberg.schema.table` in SQLAlchemy/Trino query strings. |
 | `f-string expression cannot include backslash` | Backslashes inside f-string brackets on Python <3.12. | Pre-sanitize single quotes (`.replace("'", "''")`) in an explicit local variable prior to string interpolation. |
-
-```
-
-```
