@@ -361,6 +361,10 @@ ORDER BY ?patientName ?testType
 ### 1. Check Bronze Layer (MinIO Storage)
 
 ```bash
+# Option A: Via Python Inspector Script
+python python-scripts/check_bronze.py
+
+# Option B: Via MinIO CLI Container
 # Authenticate MinIO Client inside container
 docker exec -it minio mc alias set local http://localhost:9000 minio minio123
 
