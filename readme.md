@@ -57,7 +57,6 @@ An enterprise-grade, multi-tiered data lakehouse architecture designed for proce
 
 ## 🐳 2. Container & Service Infrastructure
 
-```text
 System Architecture Diagram
        [ Client / Host Browser ]
      :8080   :8082   :8181   :5432   :9000 / :9090
@@ -87,9 +86,12 @@ System Architecture Diagram
 │  │                   │                               │ Metastore URI                     │  │
 │  │                   │                               ▼                                   │  │
 │  │                   ├──────────────► ┌───────────────────────────────────────────────┐  │  │
-│  │                   │                │ postgres (Multi-Tenant State Engine)          │  │  │
-│  │                   │                │ ├── metastore_db (Catalog Metadata)           │  │  │
-│  │                   │                │ └── document_lake (Silver Staging / JSONB)    │  │  │
+│  │                   │                │ postgres (Multi-Tenant Relational Engine)     │  │  │
+│  │                   │                │ ├── metastore_db (Iceberg Catalog Metadata)   │  │  │
+│  │                   │                │ └── document_lake                             │  │  │
+│  │                   │                │     ├── Silver Layer: staging_reports (JSONB) │  │  │
+│  │                   │                │     └── Gold Layer: Extracted Relational      │  │  │
+│  │                   │                │         Entities (Patients, Observations)    │  │  │
 │  │                   │                └───────────────────────────────────────────────┘  │  │
 │  │                   │                                                                   │  │
 │  │                   ├──────────────► ┌───────────────────────────────────────────────┐  │  │
@@ -103,7 +105,6 @@ System Architecture Diagram
 │                                                                                             │
 │  VOLUMES: [ minio-data ]   [ catalog-data ]   [ postgres-data ]                             │
 └─────────────────────────────────────────────────────────────────────────────────────────────┘
-
 ```
 
 ---
