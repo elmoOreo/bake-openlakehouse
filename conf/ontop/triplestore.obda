@@ -1,0 +1,25 @@
+[PrefixDeclaration]
+:          http://example.org/health#
+ex:        http://example.org/resource/
+rdf:       http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:       http://www.w3.org/2001/XMLSchema#
+
+[MappingDeclaration] @collection [[
+mappingId   triplestore-object-properties
+target      ex:{subject_clean} ex:{predicate_clean} ex:{value_clean} .
+source      SELECT 
+              replace(subject, ':', '_') AS subject_clean,
+              replace(predicate, ':', '_') AS predicate_clean,
+              replace(value, ':', '_') AS value_clean
+            FROM iceberg.knowledge_graph.global_triplestore
+            WHERE predicate IN ('has_visit', 'has_observation')
+
+mappingId   triplestore-data-properties
+target      ex:{subject_clean} ex:{predicate_clean} {value_clean}^^xsd:string .
+source      SELECT 
+              replace(subject, ':', '_') AS subject_clean,
+              replace(predicate, ':', '_') AS predicate_clean,
+              value AS value_clean
+            FROM iceberg.knowledge_graph.global_triplestore
+            WHERE predicate NOT IN ('has_visit', 'has_observation')
+]]

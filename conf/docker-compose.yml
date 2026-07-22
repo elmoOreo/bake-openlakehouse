@@ -101,6 +101,27 @@ services:
     depends_on:
       - minio
 
+  ontop:
+    image: ontop/ontop:latest
+    container_name: ontop-vkg
+    ports:
+      - "8082:8080"
+    environment:
+      ONTOP_JAVA_ARGS: "-Dlogging.level.it.unibz.inf.ontop=DEBUG"
+    volumes:
+      - ./ontop/presto.properties:/opt/ontop/input/presto.properties
+      - ./ontop/triplestore.obda:/opt/ontop/input/triplestore.obda
+      - ./ontop/jdbc/presto-jdbc.jar:/opt/ontop/jdbc/presto-jdbc.jar
+    command: >
+      ontop endpoint 
+      --properties=/opt/ontop/input/presto.properties 
+      --mapping=/opt/ontop/input/triplestore.obda 
+      --port=8080
+    depends_on:
+      - presto-coordinator
+    networks:
+      - presto-network
+
 volumes:
   minio-data:
   catalog-data:
