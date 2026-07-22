@@ -74,7 +74,7 @@ System Architecture Diagram
 │  │                   │                │ ontop-vkg (Virtual Knowledge Graph Engine)    │  │  │
 │  │                   │                │ SPARQL Workbench: :8082 (Mapped to :8080)     │  │  │
 │  │                   │                └──────────────┬────────────────────────────────┘  │  │
-│  │                   │                               │ Dynamic SPARQL-to-SQL Translation │  │  │
+│  │                   │                               │ Dynamic SPARQL-to-SQL Translation │  │ 
 │  │                   │                               ▼                                   │  │
 │  │                   ├──────────────► ┌───────────────────────────────────────────────┐  │  │
 │  │                   │                │ presto-coordinator (SQL Query Engine)         │  │  │
@@ -106,7 +106,7 @@ System Architecture Diagram
 │                                                                                             │
 │  VOLUMES: [ minio-data ]   [ catalog-data ]   [ postgres-data ]                             │
 └─────────────────────────────────────────────────────────────────────────────────────────────┘
-
+```
 ---
 
 ## 📊 3. Database & Table Schemas
