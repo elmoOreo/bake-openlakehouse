@@ -91,7 +91,7 @@ System Architecture Diagram
 │  │                   │                │ └── document_lake                             │  │  │
 │  │                   │                │     ├── Silver Layer: staging_reports (JSONB) │  │  │
 │  │                   │                │     └── Gold Layer: Extracted Relational      │  │  │
-│  │                   │                │         Entities (Patients, Observations)    │  │  │
+│  │                   │                │         Entities (Patients, Observations)     │  │  │
 │  │                   │                └───────────────────────────────────────────────┘  │  │
 │  │                   │                                                                   │  │
 │  │                   ├──────────────► ┌───────────────────────────────────────────────┐  │  │
